@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings — RAG App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+</head>
+<body>
+    <div class="settings-container">
+        <!-- Header -->
+        <header class="settings-header">
+            <div class="header-left">
+                <a href="/" class="back-link" aria-label="Back to RAG">← Back to RAG</a>
+                <h1 class="settings-title">⚙️ RAG Settings</h1>
+            </div>
+        </header>
+
+        <main class="settings-main">
+            <!-- LLM Backend Configuration -->
+            <section class="settings-section">
+                <h2 class="section-heading">LLM Backend</h2>
+
+                <div class="form-group">
+                    <label for="llm-backend">Backend Provider</label>
+                    <div class="input-with-tooltip">
+                        <select id="llm-backend" class="form-select">
+                            <option value="ollama">Ollama (Local)</option>
+                            <option value="openai">OpenAI</option>
+                            <option value="gemini">Google Gemini</option>
+                        </select>
+                        <span class="tooltip" data-tip="Select which LLM provider to use. Ollama runs locally and requires no API key.">?</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="llm-model">Model Name</label>
+                    <div class="input-with-tooltip">
+                        <input type="text" id="llm-model" class="form-input" placeholder="Llama-3.2-3B-Instruct-Q4_K_M">
+                        <span class="tooltip" data-tip="The model name to use. The course defaults to Llama-3.2-3B-Instruct-Q4_K_M (the model served by the bundled server); change only if you have configured a different backend.">?</span>
+                    </div>
+                </div>
+
+                <div class="form-group" id="ollama-url-group">
+                    <label for="ollama-base-url">Ollama Base URL</label>
+                    <div class="input-with-tooltip">
+                        <input type="text" id="ollama-base-url" class="form-input" placeholder="http://localhost:11434">
+                        <span class="tooltip" data-tip="The URL where your Ollama server is running. Default: http://localhost:11434">?</span>
+                    </div>
+                </div>
+
+                <div class="form-group" id="openai-key-group">
+                    <label for="api-key-openai">OpenAI API Key</label>
+                    <div class="input-with-tooltip">
+                        <input type="password" id="api-key-openai" class="form-input" placeholder="sk-...">
+                        <span class="tooltip" data-tip="Your OpenAI API key. Required for OpenAI backend.">?</span>
+                    </div>
+                </div>
+
+                <div class="form-group" id="gemini-key-group">
+                    <label for="api-key-gemini">Gemini API Key</label>
+                    <div class="input-with-tooltip">
+                        <input type="password" id="api-key-gemini" class="form-input" placeholder="AI...">
+                        <span class="tooltip" data-tip="Your Google Gemini API key. Required for Gemini backend.">?</span>
+                    </div>
+                </div>
+
+                <!-- Connection Status & Test -->
+                <div class="connection-row">
+                    <div class="connection-status" id="connection-status">
+                        <span class="status-dot gray"></span>
+                        <span class="status-text">Not tested</span>
+                    </div>
+                    <button type="button" id="test-connection-btn" class="btn btn-secondary">Test Connection</button>
+                </div>
+            </section>
+
+            <!-- RAG-Specific Parameters -->
+            <section class="settings-section">
+                <h2 class="section-heading">RAG Parameters</h2>
+
+                <div class="form-group">
+                    <label for="chunk-size">Chunk Size</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="chunk-size" class="form-input" min="50" max="5000" value="500">
+                        <span class="tooltip" data-tip="Maximum number of characters per document chunk. Smaller chunks give more precise retrieval but less context. Recommended: 200–1000">?</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="chunk-overlap">Chunk Overlap</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="chunk-overlap" class="form-input" min="0" max="500" value="50">
+                        <span class="tooltip" data-tip="Number of characters that overlap between consecutive chunks. Helps preserve context at chunk boundaries. Recommended: 10–20% of chunk size">?</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="top-k">Top-K Results</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="top-k" class="form-input" min="1" max="50" value="5">
+                        <span class="tooltip" data-tip="Number of most relevant chunks to retrieve for each query. More chunks provide more context but may include less relevant information. Recommended: 3–10">?</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="embedding-model">Embedding Model</label>
+                    <div class="input-with-tooltip">
+                        <input type="text" id="embedding-model" class="form-input" placeholder="all-MiniLM-L6-v2">
+                        <span class="tooltip" data-tip="The sentence-transformers model used for generating embeddings. Default: all-MiniLM-L6-v2 (fast, good quality). Alternative: all-mpnet-base-v2 (higher quality, slower)">?</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="temperature">Temperature: <span id="temperature-value">0.7</span></label>
+                    <div class="input-with-tooltip">
+                        <input type="range" id="temperature" class="form-range" min="0" max="2" step="0.1" value="0.7">
+                        <span class="tooltip" data-tip="Controls randomness in generated answers. Lower values produce more factual, focused answers. Range: 0.0–2.0">?</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="max-tokens">Max Tokens</label>
+                    <div class="input-with-tooltip">
+                        <input type="number" id="max-tokens" class="form-input" min="1" max="32000" value="1024">
+                        <span class="tooltip" data-tip="Maximum number of tokens in the generated answer. Recommended: 256–4096">?</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Integration Mode -->
+            <section class="settings-section">
+                <h2 class="section-heading">Integration</h2>
+
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="integration-mode" class="form-checkbox">
+                        <span>Enable Integrated Mode</span>
+                    </label>
+                    <p class="help-text">When enabled, the RAG app exposes its API for use by other applications (chatbot, agents).</p>
+                </div>
+            </section>
+
+            <!-- Save Button -->
+            <div class="settings-actions">
+                <button type="button" id="save-btn" class="btn btn-primary">Save Configuration</button>
+                <span class="save-status" id="save-status"></span>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+</body>
+</html>
