@@ -14,11 +14,12 @@ In this task you will implement:
 
 import uuid
 from typing import Optional
+import itertools
 
 try:
     import chromadb
 except ImportError:
-    chromadb = None
+    raise ImportError("Chroma is not installed")
 
 
 class VectorStore:
@@ -52,8 +53,10 @@ class VectorStore:
         Raises:
             ImportError: If chromadb is not installed.
         """
-        # TODO: Your implementation here
-        raise NotImplementedError("Implement __init__ — see Task 2.4 instructions")
+
+        # chromaDB is checked in the top if its isnstalled or not.
+       
+        self.client = chromadb.PersistentClient(path=persist_directory)
 
     def add_documents(
         self,
@@ -80,8 +83,33 @@ class VectorStore:
             metadatas: Metadata for each chunk (e.g., {"chunk_index": 0, "source": "file.pdf"}).
             collection_name: Target collection name.
         """
-        # TODO: Your implementation here
-        raise NotImplementedError("Implement add_documents — see Task 2.4 instructions")
+        
+        # List is empty
+        if not texts:
+            return
+        
+        collection = self.client.get_or_create_collection(name=collection_name, metadata={"hnsw:space": "cosine"})
+        
+        ids = []
+        
+        ids = [str(uuid.uuid4()) for _ in texts]
+        
+        cleaned_metadatas = []
+
+        for metadata in metadatas:
+            cleaned = {}
+
+            for key, value in metadata.items():
+                if isinstance(value, (str, int, float, bool)):
+                    cleaned[key] = value
+                else:
+                    cleaned[key] = str(value)
+
+            cleaned_metadatas.append(cleaned)
+        
+        collection.add(ids=ids, documents=texts, embeddings=embeddings, metadatas=cleaned_metadatas)
+        
+
 
     def query(
         self,
@@ -113,8 +141,35 @@ class VectorStore:
         Returns:
             {"documents": list[str], "distances": list[float], "metadatas": list[dict]}
         """
-        # TODO: Your implementation here
-        raise NotImplementedError("Implement query — see Task 2.4 instructions")
+        try:
+            collection = self.client.get_collection(name=collection_name)
+            
+            collection_count = collection.count()
+            
+            if collection_count <= 0:
+                raise Exception("Collection is empty")
+            
+            if top_k > collection_count:
+                top_k = collection_count
+                
+            result = collection.query(query_embeddings=[query_embedding], n_results=top_k)
+            
+            # relevant_docs = collection.get(include=["documents", "distances", "metadatas"])
+
+            
+            return {
+                "documents": result["documents"][0],
+                "distances": result["distances"][0],
+                "metadatas": result["metadatas"][0]
+            }
+        except:
+            return  {
+                "documents": [],
+                "distances": [],
+                "metadatas": [],
+            }
+        
+        
 
     def delete_collection(self, collection_name: str = "default") -> None:
         """
@@ -127,8 +182,10 @@ class VectorStore:
         Args:
             collection_name: Name of collection to delete.
         """
-        # TODO: Your implementation here
-        raise NotImplementedError("Implement delete_collection — see Task 2.4 instructions")
+        try:
+           self.client.delete_collection(name=collection_name)
+        except:
+            pass
 
     def list_collections(self) -> list:
         """
@@ -141,5 +198,5 @@ class VectorStore:
         Returns:
             List of collection name strings.
         """
-        # TODO: Your implementation here
-        raise NotImplementedError("Implement list_collections — see Task 2.4 instructions")
+        collections = self.client.list_collections()
+        return [collection.name for collection in collections]

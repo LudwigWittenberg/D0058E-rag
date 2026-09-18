@@ -33,5 +33,26 @@ def build_rag_memory_prompt(user_message: str, retrieved_context: list) -> str:
     Returns:
         Formatted prompt string containing memories + user message.
     """
-    # TODO: Your implementation here
-    raise NotImplementedError("Implement build_rag_memory_prompt() — see Lab 2, Task 2.5")
+    if not retrieved_context:
+        return f"User: {user_message}"
+    
+    memory_lines = []
+
+    for memory in retrieved_context:
+        role = memory["role"]
+        score = memory["score"]
+        text = memory["text"]
+
+        memory_lines.append(
+            f"{role} (score: {score:.2f}): {text}"
+        )
+
+    memories = "\n".join(memory_lines)
+
+    prompt = (
+        "Relevant conversation memory:\n"
+        f"{memories}\n\n"
+        f"User: {user_message}"
+    )
+
+    return prompt

@@ -19,3 +19,8 @@ dependencies = [
     "python-dotenv>=1.2.3",
     "sentence-transformers>=6.0.1",
 ]
+
+[tool.pyright]
+# 'ai' and 'web' live inside rag-app/, which is added to sys.path at runtime
+# (rag-app/run.py, LAB2_RAG/test_vectorstore.py). Tell the language server too.
+extraPaths = ["rag-app"]

@@ -1,6 +1,6 @@
 {
   "llm_backend": "ollama",
-  "llm_model": "Llama-3.2-3B-Instruct-Q4_K_M",
+  "llm_model": "llama3.2:3b",
   "api_key_openai": null,
   "api_key_gemini": null,
   "ollama_base_url": "http://localhost:11434",

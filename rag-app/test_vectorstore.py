@@ -30,7 +30,7 @@ import sys
 import os
 
 # Add rag-app to path so we can import ai.vectorstore
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'web-based-course', 'rag-app'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'rag-app'))
 
 from ai.vectorstore import VectorStore
 

@@ -13,6 +13,7 @@ Students implement:
 
 import os
 from pathlib import Path
+from ai.embeddings import embed_text
 
 _app_root = Path(__file__).resolve().parent.parent
 import sys
@@ -62,8 +63,21 @@ class RAGMemory:
         Returns:
             The message index.
         """
-        # TODO: Your implementation here
-        raise NotImplementedError("Implement add_message() — see Lab 2, Task 2.5")
+        self._msg_count += 1
+        
+        embedding = embed_text(text=content)
+        
+        metadata = {"role": role, "index": self._msg_count}
+        
+        self._store.add_documents(
+            texts=[content],
+            embeddings=[embedding],
+            metadatas=[metadata],
+            collection_name=self._collection_name,
+        )
+        
+        return self._msg_count
+        
 
     def retrieve_context(self, query: str, top_k: int = 3, min_score: float = 0.0) -> list:
         """
@@ -84,8 +98,65 @@ class RAGMemory:
         Returns:
             List of dicts: [{"text": str, "score": float, "role": str, "index": int}]
         """
-        # TODO: Your implementation here
-        raise NotImplementedError("Implement retrieve_context() — see Lab 2, Task 2.5")
+        query_emb = embed_text(query)
+        
+        result = self._store.query(
+            query_embedding=query_emb, # type: ignore
+            top_k=top_k,
+            collection_name=self._collection_name,
+        )
+        
+        matches = []
+
+        for text, distance, metadata in zip(
+            result["documents"],
+            result["distances"],
+            result["metadatas"],
+        ):
+            score = 1.0 - (distance / 2.0)
+
+            if score >= min_score:
+                matches.append({
+                    "text": text,
+                    "score": score,
+                    "role": metadata["role"],
+                    "index": metadata["index"],
+                })
+
+        matches.sort(key=lambda x: x["index"])
+
+        return matches
+        
+
+    def get_all_messages(self) -> list:
+        """
+        Return every stored message, in conversation order.
+
+        Used by the UI to display the current contents of the store.
+
+        Returns:
+            List of dicts: [{"text": str, "role": str, "index": int}]
+        """
+        try:
+            collection = self._store.client.get_collection(
+                name=self._collection_name
+            )
+            result = collection.get(include=["documents", "metadatas"])
+        except Exception:
+            return []
+
+        messages = [
+            {
+                "text": text,
+                "role": metadata.get("role", ""),
+                "index": metadata.get("index", 0),
+            }
+            for text, metadata in zip(
+                result["documents"] or [], result["metadatas"] or []
+            )
+        ]
+        messages.sort(key=lambda m: m["index"])
+        return messages
 
     def get_message_count(self) -> int:
         """Return the total number of messages stored."""
