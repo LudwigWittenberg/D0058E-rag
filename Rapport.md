@@ -545,3 +545,49 @@ On recent questions. For example if I say continue. It has no previous knowledge
 I would use RAG for all the information but also use the recent N messages for solving the part of what we exactly talked about. This makes it more like a conversation instead of it just answering my questions.
 
 ## Task 2.6
+
+1 = Answer could be wrong or not clearly described.
+
+3 = Answer is right and understandble.
+
+5 = Answer is clear and very good.
+
+| Question | 200 | 500 | 1000 | 1500 |
+|----------|-----|-----|------|------|
+| What is Python commonly used for? | 2 | 4 | 4 | 4 |
+| Who created Python? | 3 | 3 | 3 | 4 |
+| When was Python first released? | 3 | 3 | 4 | 4 |
+
+| Model | Dimensions | Q1 | Q2 | Q3 |
+|----------|-----|-----|------|------|
+| all-MiniLM-L6-v2 | 384 | 4 | 4 | 4 |
+| all-mpnet-base-v2 | 768 | 0 | 0 | 0 |
+| paraphrase-multilingual-MiniLM-L12-v2 | 384 | 4 | 4 | 4 |
+
+The model *all-mpnet-base-v2* model were unable to answer any question with the choosen document. It needs more context to be able to answer any questions.
+
+### Questions to answer
+
+#### At what chunk size do answers start losing important context?
+
+I did not found that it started to loose important context. I thought the answers were more clear and gave better answers with higher chunks.
+
+#### Does increasing overlap always improve results? What's the cost?
+
+No, it can help with improtant information sice that can be found in multiple chunks. But we can also have multiple almost identical chunks.
+
+#### Does higher dimensionality always mean better retrieval?
+
+No, Higher dimensions can lead to represent the chunk in a better way then a low amount of dimensions.
+
+#### When would you choose the multilingual model?
+
+When you documents could be in different languages.
+
+#### If your document is in Swedish, which model would you use?
+
+multilingual
+
+#### Would the optimal chunk size differ for a legal document vs. a novel vs. a FAQ?
+
+I think the optimal chunk size differ on the type of documents its is. Legal documents is ofter longer so I think a bigger chunk is better. While FAQ is ofter small which fits a small chunk better.

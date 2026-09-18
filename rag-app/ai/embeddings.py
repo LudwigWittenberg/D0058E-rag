@@ -38,7 +38,7 @@ def _get_model(model: str):
     return _model_cache[model]
 
 
-def embed_text(text: str, model: str = "all-MiniLM-L6-v2") -> np.ndarray:
+def embed_text(text: str, model: str = "all-mpnet-base-v2") -> np.ndarray:
     """
     Generate an embedding vector for a text string.
 
@@ -61,7 +61,7 @@ def embed_text(text: str, model: str = "all-MiniLM-L6-v2") -> np.ndarray:
     return embedding.astype(np.float32)
 
 
-def embed_batch(texts: list, model: str = "all-MiniLM-L6-v2") -> np.ndarray:
+def embed_batch(texts: list, model: str = "all-mpnet-base-v2") -> np.ndarray:
     """
     Generate embeddings for a batch of texts.
 

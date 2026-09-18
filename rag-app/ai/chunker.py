@@ -26,7 +26,7 @@ class Chunk:
 
 def chunk_document(
     text: str,
-    chunk_size: int = 500,
+    chunk_size: int = 200,
     chunk_overlap: int = 50,
     metadata: dict = None,
 ) -> list:
